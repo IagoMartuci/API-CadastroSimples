@@ -1,0 +1,12 @@
+﻿Tools > NuGet Package Manager > Package Manager Console
+
+Criando a Migration: Add-Migration InitialCreate
+Gerando Script: Script-Migration -Output "script.sql"
+Atualizar o BD: Update-Database
+
+Quando já aplicamos a Migration no BD e queremos exlcuir, antes precisamos reverter:
+Reverter Migration Especifica (quando tem mais de uma Migration): Update-Database -Migration InitialCreate
+Reverter Para o Estado Inicial do BD (quando só tem uma Migration): Update-Database -Migration 0
+
+Excluir a Migration: Remove-Migration
+Atualizar o BD: Update-Database
