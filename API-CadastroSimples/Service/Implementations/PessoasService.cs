@@ -1,6 +1,5 @@
 ﻿using API_CadastroSimples.Models;
 using API_CadastroSimples.Repository;
-using API_CadastroSimples.Repository.Implementations;
 
 namespace API_CadastroSimples.Service.Implementations
 {
@@ -23,34 +22,55 @@ namespace API_CadastroSimples.Service.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recuperar a lista de pessoas da camada de serviço.");
+                _logger.LogError(ex, "Erro ao recuperar a lista de pessoas - Service (Exception).");
                 throw;
             }
         }
 
-        public Task<Pessoa> GetByIdServiceAsync(int id)
+        public async Task<Pessoa> GetByIdServiceAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _pessoaRepository.GetByIdRepositoryAsync(id);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                _logger.LogWarning(knfEx, "Nenhum cadastro encontrado com o ID: {Id} - Service (KeyNotFoundException).", id);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar o cadastro com o ID: {Id} - Service (Exception).", id);
+                throw;
+            }
         }
 
-        public Task<Pessoa> GetByNomeServiceAsync(string nome)
+        public async Task<IEnumerable<Pessoa>> GetByNomeServiceAsync(string nome)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _pessoaRepository.GetByNomeRepositoryAsync(nome);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar o cadastro com o NOME: {Nome} - Service (Exception).", nome);
+                throw;
+            }
         }
 
-        public Task<Pessoa> CadastrarPessoaServiceAsync(Pessoa pessoa)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<Pessoa> CadastrarPessoaServiceAsync(Pessoa pessoa)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<Pessoa> AlterarCadastroPessoaServiceAsync(Pessoa pessoa)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<Pessoa> AlterarCadastroPessoaServiceAsync(Pessoa pessoa)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<int> DeletarCadastroPessoaServiceAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<int> DeletarCadastroPessoaServiceAsync(int id)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

@@ -6,9 +6,9 @@ namespace API_CadastroSimples.Service
     {
         Task<IEnumerable<Pessoa>> GetAllServiceAsync();
         Task<Pessoa> GetByIdServiceAsync(int id);
-        Task<Pessoa> GetByNomeServiceAsync(string nome);
-        Task<Pessoa> CadastrarPessoaServiceAsync(Pessoa pessoa);
-        Task<Pessoa> AlterarCadastroPessoaServiceAsync(Pessoa pessoa);
-        Task<int> DeletarCadastroPessoaServiceAsync(int id);
+        Task<IEnumerable<Pessoa>> GetByNomeServiceAsync(string nome);
+        //Task<Pessoa> CadastrarPessoaServiceAsync(Pessoa pessoa);
+        //Task<Pessoa> AlterarCadastroPessoaServiceAsync(Pessoa pessoa);
+        //Task<int> DeletarCadastroPessoaServiceAsync(int id);
     }
 }
