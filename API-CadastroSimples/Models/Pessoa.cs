@@ -12,5 +12,6 @@ namespace API_CadastroSimples.Models
         [NotMapped]
         public bool MaiorIdade => Idade >= 18; // Propriedade calculada, não armazenada no banco de dados
         public string DataCadastro { get; set; }
+        public Guid Codigo { get; set; }
     }
 }

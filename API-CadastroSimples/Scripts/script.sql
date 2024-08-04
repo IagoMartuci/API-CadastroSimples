@@ -17,12 +17,13 @@ CREATE TABLE [Pessoas] (
     [Idade] int NOT NULL,
     [Sexo] char(1) NULL,
     [DataCadastro] varchar(100) NOT NULL,
+    [Codigo] uniqueidentifier NOT NULL,
     CONSTRAINT [PK_Pessoas] PRIMARY KEY ([Id])
 );
 GO
 
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-VALUES (N'20240803191121_InitialCreatePessoas', N'8.0.7');
+VALUES (N'20240804161031_InitialCreate', N'8.0.7');
 GO
 
 COMMIT;

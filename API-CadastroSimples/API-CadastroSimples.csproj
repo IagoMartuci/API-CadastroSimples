@@ -7,7 +7,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>API_CadastroSimples</RootNamespace>
 
-	  <!--Habilitar a geração do arquivo XML (Swagger)-->
+	  <!--Habilita a geração do arquivo XML (Swagger)-->
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>

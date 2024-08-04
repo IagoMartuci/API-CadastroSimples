@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace API_CadastroSimples.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreatePessoas : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +20,8 @@ namespace API_CadastroSimples.Migrations
                     Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Idade = table.Column<int>(type: "int", nullable: false),
                     Sexo = table.Column<string>(type: "char(1)", nullable: true),
-                    DataCadastro = table.Column<string>(type: "varchar(100)", nullable: false)
+                    DataCadastro = table.Column<string>(type: "varchar(100)", nullable: false),
+                    Codigo = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
