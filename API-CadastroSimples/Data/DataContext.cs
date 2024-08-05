@@ -19,16 +19,12 @@ namespace API_CadastroSimples.Data
 
                 entity.Property(p => p.Sexo)
                     .IsRequired(false) // Define que a coluna pode ser nula
-                    .HasColumnType("char(1)") // Define o tipo da coluna como char com comprimento de 1 caractere
+                    .HasColumnType("varchar(1)") // Define o tipo da coluna como varchar com comprimento de 1 caractere
                     .HasConversion(
-                        v => v.HasValue ? v.ToString()[0] : (char?)null, // Converte o enum para char, ou nulo se o enum for nulo
-                        v => v.HasValue ? (SexoEnum)Enum.ToObject(typeof(SexoEnum), v) : (SexoEnum?)null // Converte o char de volta para o enum, ou nulo se o char for null
+                        v => v.HasValue ? v.ToString() : null, // Converte o enum para string, ou nulo se o enum for nulo
+                        v => !string.IsNullOrEmpty(v) ? (SexoEnum)Enum.Parse(typeof(SexoEnum), v) : (SexoEnum?)null // Converte a string de volta para o enum, ou nulo se a string for nula ou vazia
                     );
-
-                entity.Property(p => p.DataCadastro)
-                    .HasColumnType("varchar(100)"); // Define o campo DataCadastro como um varchar com tamanho máximo de 100 caracteres
             });
         }
-
     }
 }

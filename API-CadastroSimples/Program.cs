@@ -7,6 +7,7 @@ using API_CadastroSimples.Service;
 using API_CadastroSimples.Service.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,13 +16,18 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IPessoasRepository, PessoasRepository>();
-//builder.Services.AddScoped<IPessoasBusiness, PessoasBusiness>();
+builder.Services.AddScoped<IPessoasBusiness, PessoasBusiness>();
 builder.Services.AddScoped<IPessoasService, PessoasService>();
 
 // Configurando para os endpoints no Swagger ficarem todos em minúsculo
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            // Configurando a serialização JSON, nesse caso foi necessário por conta do Enum, para ele aceitar "F" e "M" como entrada e retornar assim no JSON também.
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
 // Adiciona o Swagger
 builder.Services.AddSwaggerGen(c =>

@@ -1,16 +1,19 @@
-﻿using API_CadastroSimples.Models;
+﻿using API_CadastroSimples.Business;
+using API_CadastroSimples.Models;
 using API_CadastroSimples.Repository;
 
 namespace API_CadastroSimples.Service.Implementations
 {
     public class PessoasService : IPessoasService
     {
-        private readonly IPessoasRepository _pessoaRepository;
+        private readonly IPessoasRepository _pessoasRepository;
+        private readonly IPessoasBusiness _pessoasBusiness;
         private readonly ILogger<PessoasService> _logger;
 
-        public PessoasService(IPessoasRepository pessoaRepository, ILogger<PessoasService> logger)
+        public PessoasService(IPessoasRepository pessoasRepository, IPessoasBusiness pessoasBusiness, ILogger<PessoasService> logger)
         {
-            _pessoaRepository = pessoaRepository;
+            _pessoasRepository = pessoasRepository;
+            _pessoasBusiness = pessoasBusiness;
             _logger = logger;
         }
 
@@ -18,7 +21,7 @@ namespace API_CadastroSimples.Service.Implementations
         {
             try
             {
-                return await _pessoaRepository.GetAllRepositoryAsync();
+                return await _pessoasRepository.GetAllRepositoryAsync();
             }
             catch (Exception ex)
             {
@@ -31,7 +34,7 @@ namespace API_CadastroSimples.Service.Implementations
         {
             try
             {
-                return await _pessoaRepository.GetByIdRepositoryAsync(id);
+                return await _pessoasRepository.GetByIdRepositoryAsync(id);
             }
             catch (KeyNotFoundException knfEx)
             {
@@ -49,7 +52,7 @@ namespace API_CadastroSimples.Service.Implementations
         {
             try
             {
-                return await _pessoaRepository.GetByNomeRepositoryAsync(nome);
+                return await _pessoasRepository.GetByNomeRepositoryAsync(nome);
             }
             catch (Exception ex)
             {
@@ -58,10 +61,29 @@ namespace API_CadastroSimples.Service.Implementations
             }
         }
 
-        //public Task<Pessoa> CadastrarPessoaServiceAsync(Pessoa pessoa)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<Pessoa> CadastrarPessoaServiceAsync(Pessoa pessoa)
+        {
+            try
+            {
+                var pessoaValidada = await _pessoasBusiness.CadastrarPessoaBusinessAsync(pessoa);
+                return await _pessoasRepository.CadastrarPessoaRepositoryAsync(pessoaValidada);
+            }
+            //catch (BadHttpRequestException brEx)
+            //{
+            //    _logger.LogWarning(brEx, "Erro ao efetuar o cadastro - Service (BadHttpRequestException).");
+            //    throw;
+            //}
+            catch (InvalidOperationException ioEx)
+            {
+                _logger.LogWarning(ioEx, "Erro ao efetuar o cadastro - Service (InvalidOperationException).");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao efetuar o cadastro - Service (Exception).");
+                throw;
+            }
+        }
 
         //public Task<Pessoa> AlterarCadastroPessoaServiceAsync(Pessoa pessoa)
         //{

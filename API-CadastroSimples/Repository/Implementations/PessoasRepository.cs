@@ -20,8 +20,6 @@ namespace API_CadastroSimples.Repository.Implementations
         {
             try
             {
-                //return await _context.Pessoas.ToListAsync(); // Retornando a lista direto, se não tiver item retorna a lsita vazia.
-
                 var result = await _context.Pessoas.ToListAsync();
 
                 if (!result.Any()) // Configurando para ao invés de retornar a lista vazia, retornar uma mensagem personalizada.
@@ -120,10 +118,30 @@ namespace API_CadastroSimples.Repository.Implementations
             }
         }
 
-        //public Task<Pessoa> CadastrarPessoaRepositoryAsync(Pessoa pessoa)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<Pessoa> CadastrarPessoaRepositoryAsync(Pessoa pessoa)
+        {
+            try
+            {
+                await _context.Pessoas.AddAsync(pessoa);
+                await _context.SaveChangesAsync();
+                return pessoa;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "Erro ao efetuar o cadastro - Repository (DbUpdateException).");
+                throw;
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "Erro ao efetuar o cadastro - Repository (SqlException).");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao efetuar o cadastro - Repository (Exception).");
+                throw;
+            }
+        }
 
         //public Task<Pessoa> AlterarCadastroPessoaRepositoryAsync(Pessoa pessoa)
         //{
@@ -134,5 +152,26 @@ namespace API_CadastroSimples.Repository.Implementations
         //{
         //    throw new NotImplementedException();
         //}
+
+        public async Task<Pessoa> BuscarPorNomeRepositoryAsync(string nome)
+        {
+            try
+            {
+                return await _context.Pessoas
+                    .FirstOrDefaultAsync(x => x.Nome.ToLower() == nome.ToLower());
+            }
+            // Capturar a InvalidOperationException e lançar uma Exception comum
+            // em vez de simplesmente relançar a InvalidOperationException.
+            catch (InvalidOperationException ioEx)
+            {
+                // Lança Exception em vez de InvalidOperationException para a camada superior, dessa forma eu consigo ir lançando como Exception até a controller, e retornar o código 500
+                throw new Exception(ioEx.Message, ioEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar nome no banco de dados - Repository (Exception).");
+                throw;
+            }
+        }
     }
 }

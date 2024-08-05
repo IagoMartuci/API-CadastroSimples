@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_CadastroSimples.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240804161031_InitialCreate")]
+    [Migration("20240805013549_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -36,9 +36,11 @@ namespace API_CadastroSimples.Migrations
                     b.Property<Guid>("Codigo")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("DataCadastro")
-                        .IsRequired()
-                        .HasColumnType("varchar(100)");
+                    b.Property<DateTime?>("DataAlteracao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DataCadastro")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Idade")
                         .HasColumnType("int");
@@ -48,8 +50,8 @@ namespace API_CadastroSimples.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<char?>("Sexo")
-                        .HasColumnType("char(1)");
+                    b.Property<string>("Sexo")
+                        .HasColumnType("varchar(1)");
 
                     b.HasKey("Id");
 

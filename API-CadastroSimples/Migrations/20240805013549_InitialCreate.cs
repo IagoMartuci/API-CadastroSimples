@@ -19,8 +19,9 @@ namespace API_CadastroSimples.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Idade = table.Column<int>(type: "int", nullable: false),
-                    Sexo = table.Column<string>(type: "char(1)", nullable: true),
-                    DataCadastro = table.Column<string>(type: "varchar(100)", nullable: false),
+                    Sexo = table.Column<string>(type: "varchar(1)", nullable: true),
+                    DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DataAlteracao = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Codigo = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>

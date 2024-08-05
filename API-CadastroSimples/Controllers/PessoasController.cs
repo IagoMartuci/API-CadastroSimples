@@ -1,12 +1,10 @@
 ﻿using API_CadastroSimples.Models;
 using API_CadastroSimples.Service;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
 
 namespace API_CadastroSimples.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/")]
     [ApiController]
     public class PessoasController : ControllerBase
     {
@@ -27,8 +25,6 @@ namespace API_CadastroSimples.Controllers
         {
             try
             {
-                //return Ok(await _pessoasService.GetAllServiceAsync()); // Retornando a lista direto, se não tiver item retorna a lsita vazia.
-
                 var result = await _pessoasService.GetAllServiceAsync();
 
                 if (!result.Any()) // Configurando para ao invés de retornar a lista vazia, retornar uma mensagem personalizada.
@@ -89,6 +85,40 @@ namespace API_CadastroSimples.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Cadastro não encontrado com o NOME: {Nome} - Controller (Exception).", nome);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno.");
+            }
+        }
+
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        public async Task<IActionResult> CadastrarPessoaAsync(Pessoa pessoa)
+        {
+            try
+            {
+                var pessoaCadastrada = await _pessoasService.CadastrarPessoaServiceAsync(pessoa);
+                var url = Url.Action(nameof(GetByIdAsync), new { id = pessoaCadastrada.Id });
+                //return Created(url, pessoaCadastrada.Id);
+                //return Created(url, pessoaCadastrada);
+                //return CreatedAtAction(url, pessoaCadastrada.Id);
+                return CreatedAtAction(url, pessoaCadastrada);
+
+            }
+            // Optei por utilizar o InvalidOperationException, mas este também funciona:
+            //catch (BadHttpRequestException brEx)
+            //{
+            //    _logger.LogWarning(brEx, "Erro ao efetuar o cadastro - Controller (BadHttpRequestException).");
+            //    return BadRequest(brEx.Message);
+            //}
+            catch (InvalidOperationException ioEx)
+            {
+                _logger.LogWarning(ioEx, "Erro ao efetuar o cadastro - Controller (BadHttpRequestException).");
+                return BadRequest(ioEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao efetuar o cadastro - Controller (Exception).");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno.");
             }
         }
