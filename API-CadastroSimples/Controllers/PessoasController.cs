@@ -113,12 +113,47 @@ namespace API_CadastroSimples.Controllers
             //}
             catch (InvalidOperationException ioEx)
             {
-                _logger.LogWarning(ioEx, "Erro ao efetuar o cadastro - Controller (BadHttpRequestException).");
+                _logger.LogWarning(ioEx, "Erro ao efetuar o cadastro - Controller (InvalidOperationException).");
                 return BadRequest(ioEx.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao efetuar o cadastro - Controller (Exception).");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno.");
+            }
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPut]
+        public async Task<IActionResult> AlterarPessoaAsync(Pessoa pessoa)
+        {
+            try
+            {
+                var pessoaAtualizada = await _pessoasService.AlterarCadastroPessoaServiceAsync(pessoa);
+
+                if(pessoaAtualizada == null)
+                {
+                    return NotFound("Pessoa não encontrada!");
+                }
+
+                return Ok(pessoaAtualizada);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Controller (KeyNotFoundException).", pessoa.Id);
+                return NotFound(knfEx.Message);
+            }
+            catch (InvalidOperationException ioEx)
+            {
+                _logger.LogWarning(ioEx, "Erro ao atualizar o cadastro - Controller (InvalidOperationException).");
+                return BadRequest(ioEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar o cadastro - Controller (Exception).");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno.");
             }
         }

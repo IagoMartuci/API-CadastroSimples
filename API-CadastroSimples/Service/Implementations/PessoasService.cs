@@ -85,10 +85,29 @@ namespace API_CadastroSimples.Service.Implementations
             }
         }
 
-        //public Task<Pessoa> AlterarCadastroPessoaServiceAsync(Pessoa pessoa)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<Pessoa> AlterarCadastroPessoaServiceAsync(Pessoa pessoa)
+        {
+            try
+            {
+                var pessoaValidada = await _pessoasBusiness.AlterarCadastroPessoaBusinessAsync(pessoa);
+                return await _pessoasRepository.AlterarCadastroPessoaRepositoryAsync(pessoaValidada);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Service (KeyNotFoundException).", pessoa.Id);
+                throw;
+            }
+            catch (InvalidOperationException ioEx)
+            {
+                _logger.LogWarning(ioEx, "Erro ao atualizar o cadastro - Service (InvalidOperationException).");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar o cadastro - Service (Exception).");
+                throw;
+            }
+        }
 
         //public Task<int> DeletarCadastroPessoaServiceAsync(int id)
         //{

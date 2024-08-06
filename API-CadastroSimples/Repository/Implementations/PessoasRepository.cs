@@ -53,7 +53,7 @@ namespace API_CadastroSimples.Repository.Implementations
             try
             {
                 var result = await _context.Pessoas
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                    .SingleOrDefaultAsync(x => x.Id == id);
 
                 if (result == null)
                 {
@@ -122,8 +122,12 @@ namespace API_CadastroSimples.Repository.Implementations
         {
             try
             {
+                pessoa.DataCadastro = DateTime.Now;
+                pessoa.Codigo = Guid.NewGuid();
+
                 await _context.Pessoas.AddAsync(pessoa);
                 await _context.SaveChangesAsync();
+
                 return pessoa;
             }
             catch (DbUpdateException dbEx)
@@ -143,10 +147,69 @@ namespace API_CadastroSimples.Repository.Implementations
             }
         }
 
-        //public Task<Pessoa> AlterarCadastroPessoaRepositoryAsync(Pessoa pessoa)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<Pessoa> AlterarCadastroPessoaRepositoryAsync(Pessoa pessoa)
+        {
+            try
+            {
+                // Busca a entidade existente pelo ID
+                var result = await _context.Pessoas.SingleOrDefaultAsync(x => x.Id == pessoa.Id);
+
+                // Se a entidade não for encontrada, lance uma exceção ou retorne um resultado apropriado
+                if (result == null)
+                {
+                    throw new KeyNotFoundException("Pessoa não encontrada - Repository.");
+                }
+
+                // Atualiza as propriedades específicas
+                var entry = _context.Entry(result);
+
+                //Apenas marque as propriedades que você deseja modificar
+                if (pessoa.Nome != null)
+                {
+                    entry.Property(e => e.Nome).CurrentValue = pessoa.Nome;
+                    entry.Property(e => e.Nome).IsModified = true;
+                }
+                if (pessoa.Idade != default)
+                {
+                    entry.Property(e => e.Idade).CurrentValue = pessoa.Idade;
+                    entry.Property(e => e.Idade).IsModified = true;
+                }
+                if (pessoa.Sexo != null || entry.Property(e => e.Sexo).CurrentValue != null)
+                {
+                    entry.Property(e => e.Sexo).CurrentValue = pessoa.Sexo;
+                    entry.Property(e => e.Sexo).IsModified = true;
+                }
+
+                // Atualize a data de alteração
+                entry.Property(e => e.DataAlteracao).CurrentValue = DateTime.Now;
+                entry.Property(e => e.DataAlteracao).IsModified = true;
+
+                // Salva as alterações no banco de dados
+                await _context.SaveChangesAsync();
+
+                return result;
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Repository (KeyNotFoundException).", pessoa.Id);
+                throw;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "Erro ao atualizar o cadastro - Repository (DbUpdateException).");
+                throw;
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "Erro ao atualizar o cadastro - Repository (SqlException).");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar o cadastro - Repository (Exception).");
+                throw;
+            }
+        }
 
         //public Task<int> DeletarCadastroPessoaRepositoryAsync(int id)
         //{
