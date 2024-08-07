@@ -17,6 +17,6 @@ namespace API_CadastroSimples.Models
         [JsonIgnore] // Para não serializar no JSON teste do Postman
         [NotMapped]
         // Propriedade calculada, apenas para controle interno da regra de negócio, não armazenada no banco de dados.
-        public bool MaiorIdade => Idade >= 18; // Se Idade < 18 bool MaiorIdade = false e não cadastra (apliquei a validação no método da camada Business.
+        public bool MaiorIdade => Idade >= 18; // Se Idade < 18 bool MaiorIdade = false e não cadastra (apliquei a validação nos métodos da camada Business).
     }
 }

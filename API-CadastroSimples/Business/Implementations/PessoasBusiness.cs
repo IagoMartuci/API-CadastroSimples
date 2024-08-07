@@ -62,38 +62,30 @@ namespace API_CadastroSimples.Business.Implementations
         {
             try
             {
-                var pessoaComNomeExistente = await _pessoasRepository.BuscarPorNomeRepositoryAsync(pessoa.Nome);
-                var verificarIdValido = await _pessoasRepository.GetByIdRepositoryAsync(pessoa.Id);
+                await _pessoasRepository.GetByIdRepositoryAsync(pessoa.Id);
 
-                if (verificarIdValido == null)
-                {
-                    throw new KeyNotFoundException("Pessoa não encontrada - Business.");
-                }
+                var pessoaComNomeExistente = await _pessoasRepository.BuscarPorNomeRepositoryAsync(pessoa.Nome);
+
                 if (pessoaComNomeExistente != null && pessoaComNomeExistente.Id != pessoa.Id)
                 {
-                    throw new InvalidOperationException($"Já existe uma pessoa cadastrada com o NOME: {pessoa.Nome} no BD: {pessoaComNomeExistente.Nome} - Business");
+                    throw new BadHttpRequestException($"Já existe uma pessoa cadastrada com o NOME: {pessoa.Nome} no BD: {pessoaComNomeExistente.Nome} - Business");
                 }
                 if (!pessoa.MaiorIdade)
                 {
-                    throw new InvalidOperationException($"A idade mínima para cadastro é 18 anos - Business.");
+                    throw new BadHttpRequestException($"A idade mínima para cadastro é 18 anos - Business.");
                 }
                 if (!pessoa.Sexo.Equals("F") && !pessoa.Sexo.Equals("M")
                         && pessoa.Sexo != SexoEnum.F && pessoa.Sexo != SexoEnum.M
                             && pessoa.Sexo != null)
                 {
-                    throw new InvalidOperationException($"Sexo deve ser F, M ou null - Business.");
+                    throw new BadHttpRequestException($"Sexo deve ser F, M ou null - Business.");
                 }
 
                 return pessoa;
             }
-            catch (KeyNotFoundException knfEx)
+            catch (BadHttpRequestException brEx)
             {
-                _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Business (KeyNotFoundException).", pessoa.Id);
-                throw;
-            }
-            catch (InvalidOperationException ioEx)
-            {
-                _logger.LogWarning(ioEx, "Erro ao atualizar o cadastro - Business (InvalidOperationException).");
+                _logger.LogWarning(brEx, "Erro ao atualizar o cadastro - Business (BadHttpRequestException).");
                 throw;
             }
             catch (Exception ex)

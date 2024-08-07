@@ -68,11 +68,11 @@ namespace API_CadastroSimples.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("nome/{nome}")]
-        public async Task<ActionResult<IEnumerable<Pessoa>>> GetByNomeAsync(string nome)
+        public async Task<ActionResult<IEnumerable<Pessoa>>> GetByNomeAproximadoAsync(string nome)
         {
             try
             {
-                var result = await _pessoasService.GetByNomeServiceAsync(nome);
+                var result = await _pessoasService.GetByNomeAproximadoServiceAsync(nome);
 
                 if (!result.Any())
                 {
@@ -101,8 +101,8 @@ namespace API_CadastroSimples.Controllers
                 var url = Url.Action(nameof(GetByIdAsync), new { id = pessoaCadastrada.Id });
                 //return Created(url, pessoaCadastrada.Id);
                 //return Created(url, pessoaCadastrada);
-                //return CreatedAtAction(url, pessoaCadastrada.Id);
-                return CreatedAtAction(url, pessoaCadastrada);
+                //return CreatedAtAction(url, pessoaCadastrada.Id); // Retorna somente o id
+                return CreatedAtAction(url, pessoaCadastrada); // Retorna o objeto todo
 
             }
             // Optei por utilizar o InvalidOperationException, mas este também funciona:
@@ -132,24 +132,20 @@ namespace API_CadastroSimples.Controllers
         {
             try
             {
-                var pessoaAtualizada = await _pessoasService.AlterarCadastroPessoaServiceAsync(pessoa);
-
-                if(pessoaAtualizada == null)
-                {
-                    return NotFound("Pessoa não encontrada!");
-                }
-
-                return Ok(pessoaAtualizada);
+                return Ok(await _pessoasService.AlterarCadastroPessoaServiceAsync(pessoa));
             }
             catch (KeyNotFoundException knfEx)
             {
                 _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Controller (KeyNotFoundException).", pessoa.Id);
                 return NotFound(knfEx.Message);
             }
-            catch (InvalidOperationException ioEx)
+            // Tive que trocar a InvalidOperationException pela BadHttpRequestException, pois, a InvalidOperationException é mais genérica do que a BadHttpRequestException,
+            // então a Exception que acontecia no método GetById do Repository estava retornando como InvalidOperationException nos metodos AlterarCadastro das camadas superiores.
+            // Obs.: método AlterarCadastroPessoaBusinessAsync utiliza o método GetByIdRepositoryAsync para validar o ID, por isso a Exception é gerada originalmente no método GetByIdRepositoryAsync. 
+            catch (BadHttpRequestException brEx)
             {
-                _logger.LogWarning(ioEx, "Erro ao atualizar o cadastro - Controller (InvalidOperationException).");
-                return BadRequest(ioEx.Message);
+                _logger.LogWarning(brEx, "Erro ao atualizar o cadastro - Controller (BadHttpRequestException).");
+                return BadRequest(brEx.Message);
             }
             catch (Exception ex)
             {
@@ -158,6 +154,27 @@ namespace API_CadastroSimples.Controllers
             }
         }
 
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletarCadastroPessoaAsync(int id)
+        {
+            try
+            {
+                return Ok(await _pessoasService.DeletarCadastroPessoaServiceAsync(id));
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Controller (KeyNotFoundException).", id);
+                return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao excluir o cadastro - Controller (Exception).");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno.");
+            }
+        }
     }
 }
 

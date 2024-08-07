@@ -48,11 +48,11 @@ namespace API_CadastroSimples.Service.Implementations
             }
         }
 
-        public async Task<IEnumerable<Pessoa>> GetByNomeServiceAsync(string nome)
+        public async Task<IEnumerable<Pessoa>> GetByNomeAproximadoServiceAsync(string nome)
         {
             try
             {
-                return await _pessoasRepository.GetByNomeRepositoryAsync(nome);
+                return await _pessoasRepository.GetByNomeAproximadoRepositoryAsync(nome);
             }
             catch (Exception ex)
             {
@@ -92,14 +92,9 @@ namespace API_CadastroSimples.Service.Implementations
                 var pessoaValidada = await _pessoasBusiness.AlterarCadastroPessoaBusinessAsync(pessoa);
                 return await _pessoasRepository.AlterarCadastroPessoaRepositoryAsync(pessoaValidada);
             }
-            catch (KeyNotFoundException knfEx)
+            catch (BadHttpRequestException brEx)
             {
-                _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Service (KeyNotFoundException).", pessoa.Id);
-                throw;
-            }
-            catch (InvalidOperationException ioEx)
-            {
-                _logger.LogWarning(ioEx, "Erro ao atualizar o cadastro - Service (InvalidOperationException).");
+                _logger.LogWarning(brEx, "Erro ao atualizar o cadastro - Service (BadHttpRequestException).");
                 throw;
             }
             catch (Exception ex)
@@ -109,9 +104,17 @@ namespace API_CadastroSimples.Service.Implementations
             }
         }
 
-        //public Task<int> DeletarCadastroPessoaServiceAsync(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<int> DeletarCadastroPessoaServiceAsync(int id)
+        {
+            try
+            {
+                return await _pessoasRepository.DeletarCadastroPessoaRepositoryAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao excluir o cadastro - Service (Exception).");
+                throw;
+            }
+        }
     }
 }

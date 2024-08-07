@@ -84,7 +84,7 @@ namespace API_CadastroSimples.Repository.Implementations
             }
         }
 
-        public async Task<IEnumerable<Pessoa>> GetByNomeRepositoryAsync(string nome)
+        public async Task<IEnumerable<Pessoa>> GetByNomeAproximadoRepositoryAsync(string nome)
         {
             try
             {
@@ -152,13 +152,7 @@ namespace API_CadastroSimples.Repository.Implementations
             try
             {
                 // Busca a entidade existente pelo ID
-                var result = await _context.Pessoas.SingleOrDefaultAsync(x => x.Id == pessoa.Id);
-
-                // Se a entidade não for encontrada, lance uma exceção ou retorne um resultado apropriado
-                if (result == null)
-                {
-                    throw new KeyNotFoundException("Pessoa não encontrada - Repository.");
-                }
+                var result = await GetByIdRepositoryAsync(pessoa.Id);
 
                 // Atualiza as propriedades específicas
                 var entry = _context.Entry(result);
@@ -189,11 +183,6 @@ namespace API_CadastroSimples.Repository.Implementations
 
                 return result;
             }
-            catch (KeyNotFoundException knfEx)
-            {
-                _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Repository (KeyNotFoundException).", pessoa.Id);
-                throw;
-            }
             catch (DbUpdateException dbEx)
             {
                 _logger.LogError(dbEx, "Erro ao atualizar o cadastro - Repository (DbUpdateException).");
@@ -211,15 +200,39 @@ namespace API_CadastroSimples.Repository.Implementations
             }
         }
 
-        //public Task<int> DeletarCadastroPessoaRepositoryAsync(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<int> DeletarCadastroPessoaRepositoryAsync(int id)
+        {
+            try
+            {
+                // Aproveitando o método GetById para fazer a busca e validação, assim se der problema ele já gera a exceção
+                // dessa forma eu só preciso configurar a exceção na Controller do método Delete.
+                _context.Pessoas.Remove(await GetByIdRepositoryAsync(id));
+                return await _context.SaveChangesAsync();
+                
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "Erro ao excluir o cadastro - Repository (DbUpdateException).");
+                throw;
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "Erro ao excluir o cadastro - Repository (SqlException).");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao excluir o cadastro - Repository (Exception).");
+                throw;
+            }
+        }
 
         public async Task<Pessoa> BuscarPorNomeRepositoryAsync(string nome)
         {
             try
             {
+                // Não estou verificando o null, pois a intenção é que a pessoa só pode se cadastrar se não tiver o nome dela já cadastrado.
+                // Então para se cadastrar, o retorno deve ser null, se for diferente disso ela não pode se cadastrar utilizando o mesmo nome.
                 return await _context.Pessoas
                     .FirstOrDefaultAsync(x => x.Nome.ToLower() == nome.ToLower());
             }
