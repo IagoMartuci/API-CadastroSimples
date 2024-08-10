@@ -139,9 +139,11 @@ namespace API_CadastroSimples.Controllers
                 _logger.LogWarning(knfEx, "Erro ao buscar o cadastro com o ID: {Id} - Controller (KeyNotFoundException).", pessoa.Id);
                 return NotFound(knfEx.Message);
             }
-            // Tive que trocar a InvalidOperationException pela BadHttpRequestException, pois, a InvalidOperationException é mais genérica do que a BadHttpRequestException,
+            // Quando eu tentava desconectar o BD e fazer a requisição, estava retornando HTTP 400 ao invés de HTTP 500:
+            // Tive que trocar a InvalidOperationException pela BadHttpRequestException, pois a InvalidOperationException é mais genérica do que a BadHttpRequestException,
             // então a Exception que acontecia no método GetById do Repository estava retornando como InvalidOperationException nos metodos AlterarCadastro das camadas superiores.
-            // Obs.: método AlterarCadastroPessoaBusinessAsync utiliza o método GetByIdRepositoryAsync para validar o ID, por isso a Exception é gerada originalmente no método GetByIdRepositoryAsync. 
+            // Portando, ela chegava na Controller e caia na InvalidOperationException (HTTP 400) ao invés de cair na Exception (HTTP 500). Com a BadHttpRequestException, por ser mais específica não acontece isso.
+            // Obs.: método AlterarCadastroPessoaBusinessAsync utiliza o método GetByIdRepositoryAsync para validar o ID, por isso a Exception é gerada originalmente no método GetByIdRepositoryAsync.
             catch (BadHttpRequestException brEx)
             {
                 _logger.LogWarning(brEx, "Erro ao atualizar o cadastro - Controller (BadHttpRequestException).");
