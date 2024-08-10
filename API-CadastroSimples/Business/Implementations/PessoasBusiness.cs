@@ -9,7 +9,7 @@ namespace API_CadastroSimples.Business.Implementations
         private readonly IPessoasRepository _pessoasRepository;
         private readonly ILogger<PessoasBusiness> _logger;
 
-        public PessoasBusiness(IPessoasRepository pessoasRepository,  ILogger<PessoasBusiness> logger)
+        public PessoasBusiness(IPessoasRepository pessoasRepository, ILogger<PessoasBusiness> logger)
         {
             _pessoasRepository = pessoasRepository;
             _logger = logger;
@@ -19,11 +19,18 @@ namespace API_CadastroSimples.Business.Implementations
         {
             try
             {
+                // Remove espaços em branco do nome para salvamento no banco de dados
+                pessoa.Nome = pessoa.Nome.Trim();
+
                 var pessoaComNomeExistente = await _pessoasRepository.BuscarPorNomeRepositoryAsync(pessoa.Nome);
 
+                if (!ValidarNomeInformado(pessoa.Nome))
+                {
+                    throw new InvalidOperationException($"Nome: \"{pessoa.Nome}\" invalido! - Business.");
+                }
                 if (pessoaComNomeExistente != null)
                 {
-                    throw new InvalidOperationException($"Já existe uma pessoa cadastrada com o NOME: {pessoa.Nome} no BD: {pessoaComNomeExistente.Nome} - Business");
+                    throw new InvalidOperationException($"Já existe uma pessoa cadastrada com o NOME: {pessoa.Nome} no BD: {pessoaComNomeExistente.Nome} - Business.");
                 }
                 if (!pessoa.MaiorIdade)
                 {
@@ -64,11 +71,18 @@ namespace API_CadastroSimples.Business.Implementations
             {
                 await _pessoasRepository.GetByIdRepositoryAsync(pessoa.Id);
 
+                // Remove espaços em branco do nome para salvamento no banco de dados
+                pessoa.Nome = pessoa.Nome.Trim();
+
                 var pessoaComNomeExistente = await _pessoasRepository.BuscarPorNomeRepositoryAsync(pessoa.Nome);
 
+                if(!ValidarNomeInformado(pessoa.Nome))
+                {
+                    throw new BadHttpRequestException($"Nome: \"{pessoa.Nome}\" invalido! - Business.");
+                }
                 if (pessoaComNomeExistente != null && pessoaComNomeExistente.Id != pessoa.Id)
                 {
-                    throw new BadHttpRequestException($"Já existe uma pessoa cadastrada com o NOME: {pessoa.Nome} no BD: {pessoaComNomeExistente.Nome} - Business");
+                    throw new BadHttpRequestException($"Já existe uma pessoa cadastrada com o NOME: {pessoa.Nome} no BD: {pessoaComNomeExistente.Nome} - Business.");
                 }
                 if (!pessoa.MaiorIdade)
                 {
@@ -92,6 +106,19 @@ namespace API_CadastroSimples.Business.Implementations
             {
                 _logger.LogError(ex, "Erro ao atualizar o cadastro - Business (Exception).");
                 throw;
+            }
+        }
+
+        // Método interno para validar se o nome não é vazio, null ou espaço em branco
+        private bool ValidarNomeInformado(string nome)
+        {
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
     }

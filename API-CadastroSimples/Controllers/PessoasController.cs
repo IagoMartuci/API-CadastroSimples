@@ -30,14 +30,14 @@ namespace API_CadastroSimples.Controllers
                 if (!result.Any()) // Configurando para ao invés de retornar a lista vazia, retornar uma mensagem personalizada.
                 {
                     _logger.LogInformation("Nenhum cadastro encontrado - Controller.");
-                    return NotFound("Nenhum cadastro encontrado.");
+                    return NotFound("Nenhum cadastro encontrado - Controller.");
                 }
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recuperar a lista de pessoas - Controller.");
+                _logger.LogError(ex, "Erro ao recuperar a lista de pessoas - Controller (Exception).");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno.");
             }
         }
@@ -77,7 +77,7 @@ namespace API_CadastroSimples.Controllers
                 if (!result.Any())
                 {
                     _logger.LogInformation("Nenhum cadastro encontrado com o NOME: {Nome} - Controller.", nome);
-                    return NotFound($"Nenhum cadastro encontrado com o NOME: {nome}");
+                    return NotFound($"Nenhum cadastro encontrado com o NOME: \"{nome}\" - Controller.");
                 }
 
                 return Ok(result);

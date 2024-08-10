@@ -57,7 +57,7 @@ namespace API_CadastroSimples.Repository.Implementations
 
                 if (result == null)
                 {
-                    throw new KeyNotFoundException($"Nenhum cadastro encontrado com o ID: {id}");
+                    throw new KeyNotFoundException($"Nenhum cadastro encontrado com o ID: {id} - Repository.");
                 }
 
                 return result;
